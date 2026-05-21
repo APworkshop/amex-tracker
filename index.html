@@ -4,72 +4,112 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Amex Tracker</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0f0f13;color:#e8e4dc;font-family:'DM Sans',system-ui,sans-serif;min-height:100vh}
-input,select,button{font-family:inherit}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:#111}
-::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+body{background:#0f0f13;color:#e8e4dc;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;font-size:15px}
+button,input,select{font-family:inherit;font-size:14px}
+.hdr{background:#111116;border-bottom:1px solid #1e1e28;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:-0.03em;color:#f0ece4}
+.hdr small{font-size:11px;color:#444;font-family:monospace;display:block;margin-top:2px}
+.nav{display:flex;gap:3px;background:#1a1a22;border-radius:10px;padding:4px}
+.nav button{padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;background:transparent;color:#555;transition:all 0.15s}
+.nav button.active{background:#e8e4dc;color:#0f0f13}
+.main{max-width:860px;margin:0 auto;padding:20px 16px 80px}
+.upload{border:2px dashed #2a2a36;border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:20px;transition:all 0.2s}
+.upload:hover,.upload.drag{border-color:#a78bfa;background:#16161e}
+.upload .icon{font-size:28px;margin-bottom:8px}
+.upload p{font-weight:600;color:#ccc;font-size:14px}
+.upload small{font-size:12px;color:#444;display:block;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat{background:#111116;border:1px solid #1e1e28;border-radius:12px;padding:14px 16px}
+.stat label{font-size:10px;letter-spacing:0.15em;color:#444;text-transform:uppercase;display:block;margin-bottom:6px}
+.stat .val{font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.card{background:#111116;border:1px solid #1e1e28;border-radius:14px;padding:20px;margin-bottom:16px}
+.card-title{font-size:10px;letter-spacing:0.15em;color:#444;text-transform:uppercase;margin-bottom:16px}
+.month-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.month-nav h2{font-size:22px;font-weight:700;letter-spacing:-0.03em}
+.arrow{background:none;border:1px solid #2a2a36;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:18px;color:#888}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.day-hdr{text-align:center;font-size:10px;color:#444;font-family:monospace;letter-spacing:0.1em;padding-bottom:8px}
+.day-cell{border-radius:8px;padding:8px 6px;min-height:68px;border:1px solid #1e1e28;background:#111116;cursor:default;transition:all 0.15s;position:relative}
+.day-cell.has-tx{cursor:pointer}
+.day-cell.has-tx:hover{border-color:#e8845a44}
+.day-cell.today{background:#1a1a2e;border-color:#4a4a8a}
+.day-num{font-size:12px;font-weight:700;color:#aaa;font-family:monospace}
+.today .day-num{color:#a78bfa}
+.day-amt{font-size:10px;color:#666;margin-top:3px;font-family:monospace}
+.today .day-amt{color:#e8845a}
+.dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}
+.dot{width:5px;height:5px;border-radius:1px}
+.tx-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1a1a22}
+.tx-row:last-child{border-bottom:none}
+.tx-desc{font-size:14px;color:#ddd;display:flex;align-items:center;gap:8px}
+.tx-meta{font-size:11px;color:#444;font-family:monospace;margin-top:2px}
+.tx-amt{font-size:15px;font-weight:700;font-family:monospace;color:#e8845a;white-space:nowrap}
+.cat-dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.cat-bar-wrap{margin-bottom:12px}
+.cat-bar-row{display:flex;justify-content:space-between;margin-bottom:4px;align-items:center}
+.cat-bar-row span{font-size:13px;color:#ccc;display:flex;align-items:center;gap:6px}
+.cat-bar-row strong{font-size:13px;font-family:monospace;color:#e8e4dc}
+.cat-bar-bg{height:3px;border-radius:2px;background:#1e1e28}
+.cat-bar-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.pie-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.pie-wrap{position:relative;width:140px;height:140px;margin:0 auto 16px}
+.pie-wrap svg{transform:rotate(-90deg)}
+.pie-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#e8e4dc;text-align:center;line-height:1.3}
+.legend{display:flex;flex-direction:column;gap:8px}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#aaa}
+.legend-row strong{margin-left:auto;font-family:monospace;color:#e8e4dc}
+.ai-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ai-btn{background:#1e1e2e;border:1px solid #2a2a3e;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:12px;color:#a78bfa;font-weight:600;letter-spacing:0.05em}
+.ai-text{color:#ccc;font-size:14px;line-height:1.8;font-style:italic;white-space:pre-line}
+.ai-empty{color:#333;font-size:13px}
+.back-btn{background:none;border:1px solid #2a2a36;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#888}
+.day-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.day-header h2{font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:16px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.bar-col:hover .bar-fill{opacity:0.8}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:#e8845a;transition:height 0.4s}
+.bar-label{font-size:10px;color:#444;font-family:monospace}
+.bar-amt{font-size:10px;color:#666;font-family:monospace}
+.empty{text-align:center;padding:40px;color:#333;font-size:13px}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useMemo, useRef, useCallback } = React;
-const { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } = Recharts;
+<div class="hdr">
+  <div>
+    <h1>Amex Tracker</h1>
+    <small id="tx-count">0 transactions</small>
+  </div>
+  <nav class="nav">
+    <button class="active" onclick="setView('month')">Month</button>
+    <button onclick="setView('week')">Week</button>
+    <button onclick="setView('day')">Day</button>
+  </nav>
+</div>
+<div class="main">
+  <div class="upload" id="upload-zone" onclick="document.getElementById('file-input').click()">
+    <input type="file" id="file-input" accept=".csv" style="display:none" onchange="handleFile(this.files[0])"/>
+    <div class="icon">📄</div>
+    <p>Drop your Amex CSV here or click to upload</p>
+    <small>Sample data loaded · Download from Amex.com → Statements → Export → CSV</small>
+  </div>
+  <div id="app-content"></div>
+</div>
 
-const CATEGORY_MAP = {
-  "restaurant|dining|cafe|coffee|starbucks|mcdonald|chipotle|pizza|sushi|burger|taco|sweetgreen|momofuku|noodle": "Dining",
-  "uber|lyft|taxi|mta|metro|transit|parking|gas|fuel|shell|bp |exxon|chevron|delta|united|american air|hotel|marriott|hilton|airbnb": "Travel",
-  "amazon|walmart|target|costco|whole foods|trader joe|kroger|safeway|market|grocery|wholefoods": "Shopping",
-  "netflix|spotify|hulu|disney|apple|youtube|prime|moma|museum": "Entertainment",
-  "cvs|walgreen|pharmacy|medical|doctor|dental|health|equinox|gym": "Health",
-  "electric|water|internet|at&t|verizon|comcast|con ed|utility": "Utilities",
-};
-function autoCategory(desc) {
-  const d = desc.toLowerCase();
-  for (const [pattern, cat] of Object.entries(CATEGORY_MAP)) {
-    if (pattern.split("|").some(p => d.includes(p.trim()))) return cat;
-  }
-  return "Other";
-}
-const CAT_COLORS = { Dining:"#e8845a", Travel:"#4fc4a8", Shopping:"#e86e8a", Entertainment:"#a87fd4", Health:"#6bbf72", Utilities:"#5bbfbf", Other:"#888" };
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+<script>
+const CAT_COLORS={Dining:"#e8845a",Travel:"#4fc4a8",Shopping:"#e86e8a",Entertainment:"#a87fd4",Health:"#6bbf72",Utilities:"#5bbfbf",Other:"#888"};
+const CAT_MAP={"restaurant|dining|cafe|coffee|starbucks|mcdonald|chipotle|pizza|sushi|burger|taco|sweetgreen|momofuku|noodle":"Dining","uber|lyft|taxi|mta|metro|transit|parking|gas|fuel|shell|exxon|chevron|delta|united|american air|hotel|marriott|hilton|airbnb":"Travel","amazon|walmart|target|costco|whole foods|trader joe|kroger|safeway|market|grocery|wholefoods":"Shopping","netflix|spotify|hulu|disney|apple|youtube|prime|moma|museum":"Entertainment","cvs|walgreen|pharmacy|medical|doctor|dental|health|equinox|gym":"Health","electric|water|internet|at&t|verizon|comcast|con ed|utility":"Utilities"};
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-function parseAmexCSV(text) {
-  const lines = text.trim().split("\n").filter(Boolean);
-  if (lines.length < 2) return [];
-  const start = lines[0].toLowerCase().includes("date") ? 1 : 0;
-  return lines.slice(start).map((line, i) => {
-    const cols = [];
-    let cur = "", inQ = false;
-    for (const ch of line) {
-      if (ch === '"') { inQ = !inQ; continue; }
-      if (ch === "," && !inQ) { cols.push(cur.trim()); cur = ""; continue; }
-      cur += ch;
-    }
-    cols.push(cur.trim());
-    const rawDate = cols[0] || "";
-    const desc = cols[1] || "Unknown";
-    const rawAmt = cols[2] || "0";
-    const amount = parseFloat(rawAmt.replace(/[^0-9.\-]/g, "")) || 0;
-    let date = rawDate;
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)) {
-      const [m, d, y] = rawDate.split("/");
-      date = `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
-    }
-    const category = cols[10] ? autoCategory(cols[10]) : autoCategory(desc);
-    return { id: `${date}-${i}`, date, desc, amount: Math.abs(amount), category };
-  }).filter(t => t.date && t.amount > 0);
-}
+function autoCat(desc){const d=desc.toLowerCase();for(const[p,c]of Object.entries(CAT_MAP))if(p.split("|").some(x=>d.includes(x.trim())))return c;return"Other";}
+function fmt(n){return"$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtS(n){return n>=1000?"$"+(n/1000).toFixed(1)+"k":fmt(n);}
+function isoDate(y,m,d){return`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
 
-const SAMPLE_CSV = `Date,Description,Amount,,,,,,,,,Category
+const SAMPLE=`Date,Description,Amount,,,,,,,,,Category
 05/01/2026,WHOLE FOODS MARKET,87.43,,,,,,,,,Supermarkets
 05/01/2026,STARBUCKS #4521,6.75,,,,,,,,,Restaurants
 05/02/2026,NETFLIX.COM,15.99,,,,,,,,,Entertainment
@@ -98,296 +138,241 @@ const SAMPLE_CSV = `Date,Description,Amount,,,,,,,,,Category
 05/20/2026,DUANE READE,19.40,,,,,,,,,Drug Stores
 05/20/2026,MOMA MEMBERSHIP,120.00,,,,,,,,,Entertainment`;
 
-function fmt(n) { return "$" + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtS(n) { return n>=1000?"$"+(n/1000).toFixed(1)+"k":fmt(n); }
-function isoDate(y,m,d) { return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
-
-function App() {
-  const [txs, setTxs] = useState(() => parseAmexCSV(SAMPLE_CSV));
-  const [view, setView] = useState("month");
-  const today = useMemo(() => new Date(), []);
-  const [curYear, setCurYear] = useState(today.getFullYear());
-  const [curMonth, setCurMonth] = useState(today.getMonth());
-  const [selDay, setSelDay] = useState(null);
-  const [selWeek, setSelWeek] = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const [aiText, setAiText] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const fileRef = useRef(null);
-
-  const handleFile = useCallback(file => {
-    if (!file) return;
-    const r = new FileReader();
-    r.onload = e => {
-      const parsed = parseAmexCSV(e.target.result);
-      if (parsed.length > 0) {
-        setTxs(parsed);
-        const d = new Date(parsed[0].date + "T12:00:00");
-        setCurYear(d.getFullYear()); setCurMonth(d.getMonth());
-      }
-    };
-    r.readAsText(file);
-  }, []);
-
-  const monthKey = `${curYear}-${String(curMonth+1).padStart(2,"0")}`;
-  const monthTxs = useMemo(() => txs.filter(t => t.date.startsWith(monthKey)), [txs, monthKey]);
-  const totalMonth = useMemo(() => monthTxs.reduce((s,t)=>s+t.amount,0), [monthTxs]);
-  const byDay = useMemo(() => { const m={}; monthTxs.forEach(t=>{ if(!m[t.date])m[t.date]=[]; m[t.date].push(t); }); return m; }, [monthTxs]);
-  const byCategory = useMemo(() => { const m={}; monthTxs.forEach(t=>{m[t.category]=(m[t.category]||0)+t.amount;}); return Object.entries(m).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value); }, [monthTxs]);
-  const maxDay = useMemo(() => Math.max(...Object.values(byDay).map(a=>a.reduce((s,t)=>s+t.amount,0)),1), [byDay]);
-
-  const calDays = useMemo(() => {
-    const first = new Date(curYear, curMonth, 1).getDay();
-    const dim = new Date(curYear, curMonth+1, 0).getDate();
-    const cells = [];
-    for(let i=0;i<first;i++) cells.push(null);
-    for(let d=1;d<=dim;d++) cells.push(d);
-    return cells;
-  }, [curYear, curMonth]);
-
-  const weekDays = useMemo(() => {
-    const base = selWeek ? new Date(selWeek+"T12:00:00") : (() => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d; })();
-    return Array.from({length:7},(_,i)=>{ const d=new Date(base); d.setDate(base.getDate()+i); return d.toISOString().split("T")[0]; });
-  }, [selWeek]);
-  const weekTxs = useMemo(() => txs.filter(t=>weekDays.includes(t.date)), [txs, weekDays]);
-  const weekTotal = useMemo(() => weekTxs.reduce((s,t)=>s+t.amount,0), [weekTxs]);
-  const dayTxs = useMemo(() => selDay ? (byDay[selDay]||[]) : [], [selDay, byDay]);
-
-  const isToday = d => d === `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
-
-  const getInsight = async () => {
-    setAiLoading(true); setAiText("");
-    const summary = byCategory.map(c=>`${c.name}: ${fmt(c.value)}`).join(", ");
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:300,
-          messages:[{role:"user",content:`I spent ${fmt(totalMonth)} in ${MONTHS[curMonth]} ${curYear}. Breakdown: ${summary}. Give me 3 short practical insights about my spending. Be direct and conversational, no bullet symbols, just plain sentences separated by newlines.`}]})
-      });
-      const data = await res.json();
-      setAiText(data.content?.[0]?.text || "No insight returned.");
-    } catch { setAiText("Couldn't load insight. Try again."); }
-    setAiLoading(false);
-  };
-
-  const navBtn = (label, v) => (
-    <button onClick={()=>setView(v)} style={{flex:1,padding:"9px 0",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontFamily:"inherit",letterSpacing:"0.08em",textTransform:"uppercase",fontWeight:600,background:view===v?"#e8e4dc":"transparent",color:view===v?"#0f0f13":"#555",transition:"all 0.15s"}}>{label}</button>
-  );
-
-  return (
-    <div style={{minHeight:"100vh",background:"#0f0f13",color:"#e8e4dc"}}>
-      {/* Header */}
-      <div style={{background:"#111116",borderBottom:"1px solid #1e1e28",padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{fontSize:20,fontWeight:700,letterSpacing:"-0.03em",color:"#f0ece4"}}>Amex Tracker</div>
-          <div style={{fontSize:11,color:"#444",fontFamily:"monospace"}}>{txs.length} transactions</div>
-        </div>
-        <div style={{display:"flex",gap:4,background:"#1a1a22",borderRadius:10,padding:4}}>
-          {navBtn("Month","month")}{navBtn("Week","week")}{navBtn("Day","day")}
-        </div>
-      </div>
-
-      <div style={{maxWidth:860,margin:"0 auto",padding:"20px 16px 60px"}}>
-
-        {/* Upload */}
-        <div onDragOver={e=>{e.preventDefault();setDragging(true);}} onDragLeave={()=>setDragging(false)}
-          onDrop={e=>{e.preventDefault();setDragging(false);handleFile(e.dataTransfer.files[0]);}}
-          onClick={()=>fileRef.current?.click()}
-          style={{border:`2px dashed ${dragging?"#a78bfa":"#2a2a36"}`,borderRadius:12,padding:"20px",textAlign:"center",cursor:"pointer",marginBottom:20,transition:"all 0.2s",background:dragging?"#16161e":"transparent"}}>
-          <input ref={fileRef} type="file" accept=".csv" style={{display:"none"}} onChange={e=>handleFile(e.target.files[0])} />
-          <div style={{fontSize:24,marginBottom:6}}>📄</div>
-          <div style={{fontWeight:600,fontSize:14,color:"#ccc"}}>Drop your Amex CSV here or click to upload</div>
-          <div style={{fontSize:12,color:"#444",marginTop:4}}>Sample data loaded · Amex.com → Statements → Export → CSV</div>
-        </div>
-
-        {/* Stats */}
-        {view==="month" && (
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20}}>
-            {[["Total Spent",fmtS(totalMonth),"#e8845a"],["Transactions",monthTxs.length,"#5b8fda"],["Daily Avg",fmtS(totalMonth/new Date(curYear,curMonth+1,0).getDate()),"#4fc4a8"]].map(([l,v,c])=>(
-              <div key={l} style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:12,padding:"14px 16px"}}>
-                <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:6}}>{l}</div>
-                <div style={{fontSize:22,fontWeight:700,color:c,letterSpacing:"-0.02em"}}>{v}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* MONTH VIEW */}
-        {view==="month" && (
-          <>
-            <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px",marginBottom:16}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-                <button onClick={()=>curMonth===0?(setCurMonth(11),setCurYear(y=>y-1)):setCurMonth(m=>m-1)} style={{background:"none",border:"1px solid #2a2a36",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:16,color:"#888"}}>‹</button>
-                <div style={{fontSize:22,fontWeight:700,letterSpacing:"-0.03em"}}>{MONTHS[curMonth]} {curYear}</div>
-                <button onClick={()=>curMonth===11?(setCurMonth(0),setCurYear(y=>y+1)):setCurMonth(m=>m+1)} style={{background:"none",border:"1px solid #2a2a36",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:16,color:"#888"}}>›</button>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4,marginBottom:8}}>
-                {DAYS.map(d=><div key={d} style={{textAlign:"center",fontSize:10,color:"#444",fontFamily:"monospace",letterSpacing:"0.1em",paddingBottom:6}}>{d}</div>)}
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}}>
-                {calDays.map((day,i)=>{
-                  if(!day) return <div key={`e${i}`}/>;
-                  const ds = isoDate(curYear,curMonth,day);
-                  const dtxs = byDay[ds]||[];
-                  const amt = dtxs.reduce((s,t)=>s+t.amount,0);
-                  const isT = isToday(ds);
-                  return (
-                    <div key={day} onClick={()=>{if(dtxs.length){setSelDay(ds);setView("day");}}}
-                      style={{borderRadius:8,padding:"8px 6px",minHeight:68,background:isT?"#1a1a2e":amt>0?`rgba(232,132,90,${0.06+0.2*(amt/maxDay)})`:"#111116",border:isT?"1px solid #4a4a8a":"1px solid #1e1e28",cursor:dtxs.length?"pointer":"default",transition:"all 0.15s",position:"relative"}}>
-                      <div style={{fontSize:12,fontWeight:700,color:isT?"#a78bfa":"#aaa",fontFamily:"monospace"}}>{day}</div>
-                      {amt>0 && <div style={{fontSize:10,color:isT?"#e8845a":"#666",marginTop:3,fontFamily:"monospace"}}>{fmtS(amt)}</div>}
-                      <div style={{display:"flex",flexWrap:"wrap",gap:2,marginTop:4}}>
-                        {[...new Set(dtxs.map(t=>t.category))].slice(0,3).map(cat=>(
-                          <div key={cat} style={{width:5,height:5,borderRadius:1,background:CAT_COLORS[cat]||"#888"}}/>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {byCategory.length>0 && (
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
-                <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px"}}>
-                  <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:16}}>By Category</div>
-                  {byCategory.map(c=>(
-                    <div key={c.name} style={{marginBottom:12}}>
-                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                        <span style={{fontSize:13,color:"#ccc",display:"flex",alignItems:"center",gap:6}}>
-                          <span style={{width:8,height:8,borderRadius:2,background:CAT_COLORS[c.name]||"#888",display:"inline-block"}}/>
-                          {c.name}
-                        </span>
-                        <span style={{fontSize:13,fontFamily:"monospace",fontWeight:600,color:"#e8e4dc"}}>{fmt(c.value)}</span>
-                      </div>
-                      <div style={{height:3,borderRadius:2,background:"#1e1e28"}}>
-                        <div style={{height:"100%",borderRadius:2,background:CAT_COLORS[c.name]||"#888",width:`${(c.value/totalMonth)*100}%`,transition:"width 0.5s"}}/>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px"}}>
-                  <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:16}}>Spending Split</div>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie data={byCategory} cx="50%" cy="50%" innerRadius={50} outerRadius={78} dataKey="value" strokeWidth={0}>
-                        {byCategory.map(c=><Cell key={c.name} fill={CAT_COLORS[c.name]||"#888"}/>)}
-                      </Pie>
-                      <Tooltip formatter={v=>fmt(v)} contentStyle={{background:"#1a1a22",border:"1px solid #2a2a36",borderRadius:8,fontSize:12,fontFamily:"monospace"}}/>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-
-            <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase"}}>AI Insight</div>
-                <button onClick={getInsight} disabled={aiLoading} style={{background:"#1e1e2e",border:"1px solid #2a2a3e",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontSize:12,color:"#a78bfa",fontFamily:"monospace",fontWeight:600}}>
-                  {aiLoading?"Analyzing...":"✦ Analyze spending"}
-                </button>
-              </div>
-              {aiText ? <div style={{color:"#ccc",fontSize:14,lineHeight:1.8,fontStyle:"italic",whiteSpace:"pre-line"}}>{aiText}</div>
-                : <div style={{color:"#333",fontSize:13}}>Click to get personalized insights about this month.</div>}
-            </div>
-          </>
-        )}
-
-        {/* WEEK VIEW */}
-        {view==="week" && (
-          <>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20}}>
-              {[["Week Total",fmtS(weekTotal),"#e8845a"],["Charges",weekTxs.length,"#5b8fda"],["Daily Avg",fmtS(weekTotal/7),"#4fc4a8"]].map(([l,v,c])=>(
-                <div key={l} style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:12,padding:"14px 16px"}}>
-                  <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:6}}>{l}</div>
-                  <div style={{fontSize:22,fontWeight:700,color:c}}>{v}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px",marginBottom:16}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-                <button onClick={()=>{const d=new Date((selWeek||weekDays[0])+"T12:00:00");d.setDate(d.getDate()-7);setSelWeek(d.toISOString().split("T")[0]);}} style={{background:"none",border:"1px solid #2a2a36",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:16,color:"#888"}}>‹</button>
-                <div style={{fontSize:16,fontWeight:700}}>
-                  {new Date(weekDays[0]+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})} – {new Date(weekDays[6]+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
-                </div>
-                <button onClick={()=>{const d=new Date((selWeek||weekDays[0])+"T12:00:00");d.setDate(d.getDate()+7);setSelWeek(d.toISOString().split("T")[0]);}} style={{background:"none",border:"1px solid #2a2a36",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:16,color:"#888"}}>›</button>
-              </div>
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={weekDays.map(ds=>({day:DAYS[new Date(ds+"T12:00:00").getDay()],amount:(byDay[ds]||[]).reduce((s,t)=>s+t.amount,0),ds}))}
-                  onClick={d=>{if(d?.activePayload?.[0]?.payload?.amount>0){setSelDay(d.activePayload[0].payload.ds);setView("day");}}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e1e28" vertical={false}/>
-                  <XAxis dataKey="day" tick={{fontSize:11,fontFamily:"monospace",fill:"#666"}} axisLine={false} tickLine={false}/>
-                  <YAxis tick={{fontSize:10,fontFamily:"monospace",fill:"#444"}} axisLine={false} tickLine={false} tickFormatter={v=>v?"$"+v:""}/>
-                  <Tooltip formatter={v=>fmt(v)} contentStyle={{background:"#1a1a22",border:"1px solid #2a2a36",borderRadius:8,fontSize:12}}/>
-                  <Bar dataKey="amount" fill="#e8845a" radius={[4,4,0,0]} cursor="pointer"/>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px"}}>
-              <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:16}}>Charges This Week</div>
-              {weekTxs.length===0 && <div style={{color:"#333",fontSize:13}}>No charges this week.</div>}
-              {weekTxs.map(t=>(
-                <div key={t.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:"1px solid #1a1a22"}}>
-                  <div>
-                    <div style={{fontSize:14,color:"#ddd",display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{width:8,height:8,borderRadius:2,background:CAT_COLORS[t.category]||"#888",display:"inline-block",flexShrink:0}}/>
-                      {t.desc}
-                    </div>
-                    <div style={{fontSize:11,color:"#444",fontFamily:"monospace",marginTop:2}}>{t.date} · {t.category}</div>
-                  </div>
-                  <div style={{fontSize:15,fontWeight:700,fontFamily:"monospace",color:"#e8845a"}}>{fmt(t.amount)}</div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* DAY VIEW */}
-        {view==="day" && (
-          <>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-              <button onClick={()=>setView("month")} style={{background:"none",border:"1px solid #2a2a36",borderRadius:8,padding:"7px 14px",cursor:"pointer",fontSize:13,color:"#888"}}>← Month</button>
-              <div style={{fontSize:20,fontWeight:700,letterSpacing:"-0.02em"}}>
-                {selDay ? new Date(selDay+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}) : "Select a day"}
-              </div>
-            </div>
-            {selDay ? (
-              <>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
-                  {[["Total",fmt(dayTxs.reduce((s,t)=>s+t.amount,0)),"#e8845a"],["Charges",dayTxs.length,"#5b8fda"]].map(([l,v,c])=>(
-                    <div key={l} style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:12,padding:"14px 16px"}}>
-                      <div style={{fontSize:10,letterSpacing:"0.15em",color:"#444",textTransform:"uppercase",marginBottom:6}}>{l}</div>
-                      <div style={{fontSize:22,fontWeight:700,color:c}}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"20px"}}>
-                  {dayTxs.length===0 && <div style={{color:"#333"}}>No charges this day.</div>}
-                  {dayTxs.map(t=>(
-                    <div key={t.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:"1px solid #1a1a22"}}>
-                      <div>
-                        <div style={{fontSize:14,color:"#ddd",display:"flex",alignItems:"center",gap:8}}>
-                          <span style={{width:8,height:8,borderRadius:2,background:CAT_COLORS[t.category]||"#888",display:"inline-block"}}/>
-                          {t.desc}
-                        </div>
-                        <div style={{fontSize:11,color:"#444",fontFamily:"monospace",marginTop:2}}>{t.category}</div>
-                      </div>
-                      <div style={{fontSize:15,fontWeight:700,fontFamily:"monospace",color:"#e8845a"}}>{fmt(t.amount)}</div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div style={{background:"#111116",border:"1px solid #1e1e28",borderRadius:14,padding:"40px",textAlign:"center",color:"#333"}}>Click any day on the calendar to view charges.</div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
+function parseCSV(text){
+  const lines=text.trim().split("\n").filter(Boolean);
+  if(lines.length<2)return[];
+  const start=lines[0].toLowerCase().includes("date")?1:0;
+  return lines.slice(start).map((line,i)=>{
+    const cols=[];let cur="",inQ=false;
+    for(const ch of line){if(ch==='"'){inQ=!inQ;continue;}if(ch===","&&!inQ){cols.push(cur.trim());cur="";continue;}cur+=ch;}
+    cols.push(cur.trim());
+    const rawDate=cols[0]||"";const desc=cols[1]||"Unknown";
+    const amount=parseFloat((cols[2]||"0").replace(/[^0-9.\-]/g,""))||0;
+    let date=rawDate;
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){const[m,d,y]=rawDate.split("/");date=`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;}
+    const category=cols[10]?autoCat(cols[10]):autoCat(desc);
+    return{id:`${date}-${i}`,date,desc,amount:Math.abs(amount),category};
+  }).filter(t=>t.date&&t.amount>0);
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+let txs=parseCSV(SAMPLE);
+let view="month";
+let curYear=new Date().getFullYear();
+let curMonth=new Date().getMonth();
+let selDay=null;
+let selWeek=null;
+let aiText="";
+
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const parsed=parseCSV(e.target.result);
+    if(parsed.length>0){
+      txs=parsed;
+      const d=new Date(parsed[0].date+"T12:00:00");
+      curYear=d.getFullYear();curMonth=d.getMonth();
+    }
+    render();
+  };
+  r.readAsText(file);
+}
+
+const uz=document.getElementById("upload-zone");
+uz.addEventListener("dragover",e=>{e.preventDefault();uz.classList.add("drag");});
+uz.addEventListener("dragleave",()=>uz.classList.remove("drag"));
+uz.addEventListener("drop",e=>{e.preventDefault();uz.classList.remove("drag");handleFile(e.dataTransfer.files[0]);});
+
+function setView(v){view=v;document.querySelectorAll(".nav button").forEach(b=>{b.classList.toggle("active",b.textContent.toLowerCase()===v);});render();}
+
+function getMonthTxs(){const mk=`${curYear}-${String(curMonth+1).padStart(2,"0")}`;return txs.filter(t=>t.date.startsWith(mk));}
+function getByDay(mtxs){const m={};mtxs.forEach(t=>{if(!m[t.date])m[t.date]=[];m[t.date].push(t);});return m;}
+function getByCategory(mtxs){const m={};mtxs.forEach(t=>{m[t.category]=(m[t.category]||0)+t.amount;});return Object.entries(m).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value);}
+function getWeekDays(){
+  const base=selWeek?new Date(selWeek+"T12:00:00"):()=>{const d=new Date();d.setDate(d.getDate()-d.getDay());return d;}();
+  if(typeof base==="function")return getWeekDays();
+  return Array.from({length:7},(_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return d.toISOString().split("T")[0];});
+}
+function todayStr(){const t=new Date();return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;}
+
+function makePie(cats,total){
+  if(!cats.length)return"";
+  const R=60,cx=70,cy=70,r=40;
+  let angle=0;
+  const slices=cats.map(c=>{
+    const pct=c.value/total;
+    const a=pct*2*Math.PI;
+    const x1=cx+R*Math.sin(angle),y1=cy-R*Math.cos(angle);
+    angle+=a;
+    const x2=cx+R*Math.sin(angle),y2=cy-R*Math.cos(angle);
+    const large=a>Math.PI?1:0;
+    const x1i=cx+r*Math.sin(angle-a),y1i=cy-r*Math.cos(angle-a);
+    const x2i=cx+r*Math.sin(angle),y2i=cy-r*Math.cos(angle);
+    return`<path d="M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x2i},${y2i} A${r},${r} 0 ${large},0 ${x1i},${y1i} Z" fill="${CAT_COLORS[c.name]||"#888"}"/>`;
+  }).join("");
+  return`<div class="pie-wrap"><svg viewBox="0 0 140 140" width="140" height="140">${slices}</svg><div class="pie-center">${fmtS(total)}</div></div>`;
+}
+
+function txHTML(t){
+  return`<div class="tx-row">
+    <div style="flex:1">
+      <div class="tx-desc"><span class="cat-dot" style="background:${CAT_COLORS[t.category]||"#888"}"></span>${t.desc}</div>
+      <div class="tx-meta">${t.date} · ${t.category}</div>
+    </div>
+    <div class="tx-amt">${fmt(t.amount)}</div>
+  </div>`;
+}
+
+async function getInsight(){
+  const mtxs=getMonthTxs();const total=mtxs.reduce((s,t)=>s+t.amount,0);
+  const cats=getByCategory(mtxs);
+  const summary=cats.map(c=>`${c.name}: ${fmt(c.value)}`).join(", ");
+  document.getElementById("ai-content").innerHTML=`<div class="ai-empty">Analyzing...</div>`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,
+        messages:[{role:"user",content:`I spent ${fmt(total)} in ${MONTHS[curMonth]} ${curYear}. Breakdown: ${summary}. Give me 3 short practical insights. Be direct, no bullet symbols, just sentences separated by newlines.`}]})});
+    const data=await res.json();
+    aiText=data.content?.[0]?.text||"No insight returned.";
+  }catch{aiText="Couldn't load insight. Try again.";}
+  document.getElementById("ai-content").innerHTML=`<div class="ai-text">${aiText}</div>`;
+}
+
+function render(){
+  document.getElementById("tx-count").textContent=`${txs.length} transactions`;
+  const el=document.getElementById("app-content");
+
+  if(view==="month"){
+    const mtxs=getMonthTxs();
+    const total=mtxs.reduce((s,t)=>s+t.amount,0);
+    const byDay=getByDay(mtxs);
+    const cats=getByCategory(mtxs);
+    const maxAmt=Math.max(...Object.values(byDay).map(a=>a.reduce((s,t)=>s+t.amount,0)),1);
+    const daysInMonth=new Date(curYear,curMonth+1,0).getDate();
+    const firstDay=new Date(curYear,curMonth,1).getDay();
+    const today=todayStr();
+
+    let calCells="";
+    for(let i=0;i<firstDay;i++)calCells+=`<div></div>`;
+    for(let d=1;d<=daysInMonth;d++){
+      const ds=isoDate(curYear,curMonth,d);
+      const dtxs=byDay[ds]||[];
+      const amt=dtxs.reduce((s,t)=>s+t.amount,0);
+      const isT=ds===today;
+      const hasTx=dtxs.length>0;
+      const intensity=amt>0?Math.min(0.06+0.22*(amt/maxAmt),0.3):0;
+      const bg=isT?"#1a1a2e":amt>0?`rgba(232,132,90,${intensity})`:"";
+      const dotColors=[...new Set(dtxs.map(t=>t.category))].slice(0,3).map(c=>`<span class="dot" style="background:${CAT_COLORS[c]||"#888"}"></span>`).join("");
+      calCells+=`<div class="day-cell${hasTx?" has-tx":""}${isT?" today":""}" style="${bg?"background:"+bg+";":""}" onclick="${hasTx?`selectDay('${ds}')`:""}">
+        <div class="day-num">${d}</div>
+        ${amt>0?`<div class="day-amt">${fmtS(amt)}</div>`:""}
+        <div class="dots">${dotColors}</div>
+      </div>`;
+    }
+
+    let catBars=cats.map(c=>`<div class="cat-bar-wrap">
+      <div class="cat-bar-row"><span><span class="cat-dot" style="background:${CAT_COLORS[c.name]||"#888"}"></span>${c.name}</span><strong>${fmt(c.value)}</strong></div>
+      <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${(c.value/total*100).toFixed(1)}%;background:${CAT_COLORS[c.name]||"#888"}"></div></div>
+    </div>`).join("");
+
+    let legendHTML=cats.map(c=>`<div class="legend-row"><span class="cat-dot" style="background:${CAT_COLORS[c.name]||"#888"}"></span><span>${c.name}</span><strong>${fmt(c.value)}</strong></div>`).join("");
+
+    el.innerHTML=`
+      <div class="stats">
+        <div class="stat"><label>Total Spent</label><div class="val" style="color:#e8845a">${fmtS(total)}</div></div>
+        <div class="stat"><label>Transactions</label><div class="val" style="color:#5b8fda">${mtxs.length}</div></div>
+        <div class="stat"><label>Daily Avg</label><div class="val" style="color:#4fc4a8">${fmtS(total/daysInMonth)}</div></div>
+      </div>
+      <div class="card">
+        <div class="month-nav">
+          <button class="arrow" onclick="prevMonth()">‹</button>
+          <h2>${MONTHS[curMonth]} ${curYear}</h2>
+          <button class="arrow" onclick="nextMonth()">›</button>
+        </div>
+        <div class="cal-grid">${DAYS.map(d=>`<div class="day-hdr">${d}</div>`).join("")}${calCells}</div>
+      </div>
+      ${cats.length?`<div class="pie-grid">
+        <div class="card"><div class="card-title">By Category</div>${catBars}</div>
+        <div class="card"><div class="card-title">Spending Split</div>${makePie(cats,total)}<div class="legend">${legendHTML}</div></div>
+      </div>`:""}
+      <div class="card">
+        <div class="ai-row"><div class="card-title" style="margin:0">AI Insight</div><button class="ai-btn" onclick="getInsight()">✦ Analyze spending</button></div>
+        <div id="ai-content">${aiText?`<div class="ai-text">${aiText}</div>`:`<div class="ai-empty">Click to get personalized insights about this month.</div>`}</div>
+      </div>`;
+  }
+
+  if(view==="week"){
+    const weekDays=getWeekDays();
+    const wTxs=txs.filter(t=>weekDays.includes(t.date));
+    const wTotal=wTxs.reduce((s,t)=>s+t.amount,0);
+    const wByDay=getByDay(wTxs);
+    const maxAmt=Math.max(...weekDays.map(ds=>(wByDay[ds]||[]).reduce((s,t)=>s+t.amount,0)),1);
+
+    const barCols=weekDays.map(ds=>{
+      const amt=(wByDay[ds]||[]).reduce((s,t)=>s+t.amount,0);
+      const h=amt>0?Math.max((amt/maxAmt)*90,8):0;
+      const hasTx=amt>0;
+      return`<div class="bar-col" onclick="${hasTx?`selectDay('${ds}')`:""}">
+        <div class="bar-amt">${amt>0?fmtS(amt):""}</div>
+        <div class="bar-fill" style="height:${h}px;opacity:${hasTx?1:0.1}"></div>
+        <div class="bar-label">${DAYS[new Date(ds+"T12:00:00").getDay()]}</div>
+      </div>`;
+    }).join("");
+
+    const start=new Date(weekDays[0]+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    const end=new Date(weekDays[6]+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+
+    el.innerHTML=`
+      <div class="stats">
+        <div class="stat"><label>Week Total</label><div class="val" style="color:#e8845a">${fmtS(wTotal)}</div></div>
+        <div class="stat"><label>Charges</label><div class="val" style="color:#5b8fda">${wTxs.length}</div></div>
+        <div class="stat"><label>Daily Avg</label><div class="val" style="color:#4fc4a8">${fmtS(wTotal/7)}</div></div>
+      </div>
+      <div class="card">
+        <div class="month-nav">
+          <button class="arrow" onclick="shiftWeek(-1)">‹</button>
+          <h2 style="font-size:17px">${start} – ${end}</h2>
+          <button class="arrow" onclick="shiftWeek(1)">›</button>
+        </div>
+        <div class="bar-chart">${barCols}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">All Charges This Week</div>
+        ${wTxs.length?wTxs.map(txHTML).join(""):`<div class="empty">No charges this week.</div>`}
+      </div>`;
+  }
+
+  if(view==="day"){
+    const dtxs=selDay?(getByDay(getMonthTxs())[selDay]||txs.filter(t=>t.date===selDay)):[];
+    const dTotal=dtxs.reduce((s,t)=>s+t.amount,0);
+    const label=selDay?new Date(selDay+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}):"Select a day";
+    el.innerHTML=`
+      <div class="day-header">
+        <button class="back-btn" onclick="setView('month')">← Month</button>
+        <h2>${label}</h2>
+      </div>
+      ${selDay?`
+      <div class="stats" style="grid-template-columns:1fr 1fr">
+        <div class="stat"><label>Total</label><div class="val" style="color:#e8845a">${fmt(dTotal)}</div></div>
+        <div class="stat"><label>Charges</label><div class="val" style="color:#5b8fda">${dtxs.length}</div></div>
+      </div>
+      <div class="card">${dtxs.length?dtxs.map(txHTML).join(""):`<div class="empty">No charges this day.</div>`}</div>`
+      :`<div class="card"><div class="empty">Click any day on the calendar to view charges.</div></div>`}`;
+  }
+}
+
+function prevMonth(){if(curMonth===0){curMonth=11;curYear--;}else curMonth--;render();}
+function nextMonth(){if(curMonth===11){curMonth=0;curYear++;}else curMonth++;render();}
+function selectDay(ds){selDay=ds;setView("day");}
+function shiftWeek(dir){
+  const base=selWeek?new Date(selWeek+"T12:00:00"):new Date();
+  if(!selWeek)base.setDate(base.getDate()-base.getDay());
+  base.setDate(base.getDate()+dir*7);
+  selWeek=base.toISOString().split("T")[0];
+  render();
+}
+
+render();
 </script>
 </body>
 </html>
